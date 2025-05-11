@@ -207,5 +207,7 @@ def oauth2callback():
     save_user_credentials(session['user_email'], credentials)
     return redirect(url_for('home'))
 
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    port = int(os.getenv("PORT", 5000))
+    print(f"[INFO] Starting Flask app on port {port}")
+    app.run(debug=False, host='0.0.0.0', port=port)

@@ -4,3 +4,4 @@ __pycache__/
 .env
 credentials.json
 instance/
+users.json

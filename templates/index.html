@@ -1,139 +1,402 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ theme }}">
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MailSender Pro</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Email</title>
+  <style>
+    :root {
+      --primary-color: #5a3bff;
+      --primary-hover: #7b61ff;
+      --background-color: #1c1e22;
+      --card-background: #25272b;
+      --text-color: #e6e6e6;
+      --text-muted: #a0a5b0;
+      --border-color: #3a3f47;
+      --error-color: #ff4d4f;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(180deg, #1c1e22 0%, #25272b 100%);
+      color: var(--text-color);
+      font-family: var(--font-stack);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .email-form-container {
+      background: var(--card-background);
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 600px;
+      animation: slideUp 0.8s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    input[type="email"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: #2f3238;
+      color: var(--text-color);
+      font-size: 1rem;
+      font-family: var(--font-stack);
+      transition: var(--transition);
+    }
+
+    input[type="email"]:focus,
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(90, 59, 255, 0.2);
+      outline: none;
+      transform: translateY(-2px);
+    }
+
+    input:invalid:focus {
+      border-color: var(--error-color);
+      box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.2);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    /* Custom File Input Styles */
+    .file-input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-family: var(--font-stack);
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      cursor: pointer;
+      z-index: 2; /* Ensure input is clickable */
+    }
+
+    .custom-file-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: linear-gradient(90deg, #2f3238 0%, #35383e 100%);
+      color: var(--text-color);
+      font-size: 1rem;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 1; /* Below the input */
+    }
+
+    .custom-file-button::before {
+      content: 'Choose Files';
+      display: inline-block;
+    }
+
+    input[type="file"]:focus + .custom-file-button,
+    .custom-file-button:hover {
+      border-color: var(--primary-color);
+      background: linear-gradient(90deg, #35383e 0%, #3e4149 100%);
+      box-shadow: 0 0 0 3px rgba(90, 59, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    input[type="file"]:focus + .custom-file-button::before,
+    .custom-file-button:hover::before {
+      content: 'Select Attachments';
+    }
+
+    .custom-file-button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(90, 59, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s ease, height 0.4s ease;
+    }
+
+    .custom-file-button:hover::after {
+      width: 200%;
+      height: 200%;
+    }
+
+    /* Display selected file names */
+    .file-name {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      word-break: break-all;
+    }
+
+    button {
+      background: linear-gradient(90deg, var(--primary-color) 0%, #7b61ff 100%);
+      color: #ffffff;
+      padding: 0.875rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, var(--primary-hover) 0%, #9b81ff 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(90, 59, 255, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s ease, height 0.4s ease;
+    }
+
+    button:hover::after {
+      width: 200%;
+      height: 200%;
+    }
+
+    .logout-link {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    a:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .email-form-container {
+        padding: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.75rem;
+      }
+
+      input[type="email"],
+      input[type="text"],
+      textarea,
+      button,
+      .custom-file-button {
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem;
+      }
+
+      .email-form-container {
+        padding: 1rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      button,
+      .custom-file-button {
+        padding: 0.75rem;
+      }
+    }
+    .flash-container {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.8s ease-out;
+    }
+
+    .flash-message {
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    }
+
+    .flash-message.success {
+    background: rgba(90, 255, 130, 0.1);
+    color: #72ffb8;
+    border-color: #3eff9d;
+    }
+
+    .flash-message.error {
+    background: rgba(255, 77, 79, 0.1);
+    color: var(--error-color);
+    border-color: var(--error-color);
+    }
+
+  </style>
 </head>
 
 <body>
-    <div class="app-container">
-        <nav class="navbar">
-            <div class="navbar-left">
-                <div class="logo">
-                    <i class="fas fa-paper-plane"></i>
-                    <span>MailSender Pro</span>
-                </div>
-            </div>
-            <div class="navbar-right">
-                <div class="user-info">
-                    <span class="user-email">{{ user_email }}</span>
-                    <img src="https://www.gravatar.com/avatar/{{ user_email|lower|trim|md5 }}?d=mp" alt="User" class="avatar">
-                </div>
-                <div class="theme-toggle">
-                    <button id="theme-btn" aria-label="Toggle theme">
-                        <i class="fas fa-sun light-icon"></i>
-                        <i class="fas fa-moon dark-icon"></i>
-                    </button>
-                </div>
-                <a href="{{ url_for('logout') }}" class="logout-btn" title="Logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
-            </div>
-        </nav>
-
-        <div class="content">
-            <div class="compose-container">
-                <div class="section-title">
-                    <i class="fas fa-envelope"></i>
-                    <h2>Compose Email</h2>
-                </div>
-
-                <div class="flash-messages">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                      {% if messages %}
-                        {% for category, message in messages %}
-                          <div class="alert alert-{{ category }}">
-                            <i class="{% if category == 'success' %}fas fa-check-circle{% elif category == 'error' %}fas fa-exclamation-circle{% else %}fas fa-info-circle{% endif %}"></i>
-                            {{ message }}
-                            <button class="close-alert">×</button>
-                          </div>
-                        {% endfor %}
-                      {% endif %}
-                    {% endwith %}
-                </div>
-
-                <form method="POST" action="{{ url_for('send') }}" enctype="multipart/form-data" class="email-form" id="emailForm">
-                    <div class="form-group">
-                        <label for="to">
-                            <i class="fas fa-user"></i>
-                            To:
-                        </label>
-                        <input type="email" id="to" name="to" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reply_to">
-                            <i class="fas fa-reply"></i>
-                            Reply-To:
-                        </label>
-                        <input type="email" id="reply_to" name="reply_to">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="subject">
-                            <i class="fas fa-heading"></i>
-                            Subject:
-                        </label>
-                        <input type="text" id="subject" name="subject" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="body">
-                            <i class="fas fa-pen"></i>
-                            Message:
-                        </label>
-                        <textarea id="body" name="body" rows="8" required></textarea>
-                    </div>
-
-                    <div class="form-group file-input-container">
-                        <label for="attachments">
-                            <i class="fas fa-paperclip"></i>
-                            Attachments:
-                        </label>
-                        <div class="custom-file-input">
-                            <input type="file" id="attachments" name="attachments" multiple>
-                            <div class="file-input-button">
-                                <i class="fas fa-upload"></i>
-                                <span>Choose files</span>
-                            </div>
-                            <div class="file-info">No files selected</div>
-                        </div>
-                    </div>
-
-                    <div class="selected-files" id="selectedFiles"></div>
-
-                    <div class="form-actions">
-                        <button type="button" class="clear-btn" id="clearForm">
-                            <i class="fas fa-eraser"></i>
-                            Clear
-                        </button>
-                        <button type="submit" class="send-btn">
-                            <i class="fas fa-paper-plane"></i>
-                            Send Email
-                        </button>
-                    </div>
-                </form>
-            </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+        {% for category, message in messages %}
+            <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
         </div>
+    {% endif %}
+    {% endwith %}
 
-        <footer class="footer">
-            <p>&copy; 2025 MailSender Pro. All rights reserved.</p>
-        </footer>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Sending email...</p>
+  <h2>Send Email</h2>
+  <p>Logged in as: {{ user_email }}</p>
+  <div class="email-form-container">
+    <form method="POST" action="{{ url_for('send') }}" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="to">To:</label>
+        <input type="email" id="to" name="to" required>
+      </div>
+      <div class="form-group">
+        <label for="reply_to">Reply-To:</label>
+        <input type="email" id="reply_to" name="reply_to">
+      </div>
+      <div class="form-group">
+        <label for="subject">Subject:</label>
+        <input type="text" id="subject" name="subject">
+      </div>
+      <div class="form-group">
+        <label for="body">Body:</label>
+        <textarea id="body" name="body"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="attachments">Attachments:</label>
+        <div class="file-input-wrapper">
+          <input type="file" id="attachments" name="attachments" multiple>
+          <span class="custom-file-button"></span>
+          <span class="file-name" id="file-name">No files selected</span>
         </div>
-    </div>
+      </div>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+  <div class="logout-link">
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script>
+    // Update file input text when files are selected
+    const fileInput = document.getElementById('attachments');
+    const fileNameDisplay = document.getElementById('file-name');
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        const fileNames = Array.from(fileInput.files).map(file => file.name).join(', ');
+        fileNameDisplay.textContent = fileNames;
+      } else {
+        fileNameDisplay.textContent = 'No files selected';
+      }
+    });
+  </script>
 </body>
-
 </html>

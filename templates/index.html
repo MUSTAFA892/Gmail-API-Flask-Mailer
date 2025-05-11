@@ -1,17 +1,139 @@
 <!DOCTYPE html>
-<html>
-<head><title>Send Email</title></head>
+<html lang="en" data-theme="{{ theme }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailSender Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
 <body>
-  <h2>Send Email</h2>
-  <p>Logged in as: {{ user_email }}</p>
-  <form method="POST" action="{{ url_for('send') }}" enctype="multipart/form-data">
-    To: <input type="email" name="to" required><br>
-    Reply-To: <input type="email" name="reply_to"><br>
-    Subject: <input type="text" name="subject"><br>
-    Body:<br><textarea name="body"></textarea><br>
-    Attachments: <input type="file" name="attachments" multiple><br>
-    <button type="submit">Send</button>
-  </form>
-  <p><a href="{{ url_for('logout') }}">Logout</a></p>
+    <div class="app-container">
+        <nav class="navbar">
+            <div class="navbar-left">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>MailSender Pro</span>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <div class="user-info">
+                    <span class="user-email">{{ user_email }}</span>
+                    <img src="https://www.gravatar.com/avatar/{{ user_email|lower|trim|md5 }}?d=mp" alt="User" class="avatar">
+                </div>
+                <div class="theme-toggle">
+                    <button id="theme-btn" aria-label="Toggle theme">
+                        <i class="fas fa-sun light-icon"></i>
+                        <i class="fas fa-moon dark-icon"></i>
+                    </button>
+                </div>
+                <a href="{{ url_for('logout') }}" class="logout-btn" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="compose-container">
+                <div class="section-title">
+                    <i class="fas fa-envelope"></i>
+                    <h2>Compose Email</h2>
+                </div>
+
+                <div class="flash-messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <div class="alert alert-{{ category }}">
+                            <i class="{% if category == 'success' %}fas fa-check-circle{% elif category == 'error' %}fas fa-exclamation-circle{% else %}fas fa-info-circle{% endif %}"></i>
+                            {{ message }}
+                            <button class="close-alert">×</button>
+                          </div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
+                </div>
+
+                <form method="POST" action="{{ url_for('send') }}" enctype="multipart/form-data" class="email-form" id="emailForm">
+                    <div class="form-group">
+                        <label for="to">
+                            <i class="fas fa-user"></i>
+                            To:
+                        </label>
+                        <input type="email" id="to" name="to" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reply_to">
+                            <i class="fas fa-reply"></i>
+                            Reply-To:
+                        </label>
+                        <input type="email" id="reply_to" name="reply_to">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">
+                            <i class="fas fa-heading"></i>
+                            Subject:
+                        </label>
+                        <input type="text" id="subject" name="subject" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="body">
+                            <i class="fas fa-pen"></i>
+                            Message:
+                        </label>
+                        <textarea id="body" name="body" rows="8" required></textarea>
+                    </div>
+
+                    <div class="form-group file-input-container">
+                        <label for="attachments">
+                            <i class="fas fa-paperclip"></i>
+                            Attachments:
+                        </label>
+                        <div class="custom-file-input">
+                            <input type="file" id="attachments" name="attachments" multiple>
+                            <div class="file-input-button">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose files</span>
+                            </div>
+                            <div class="file-info">No files selected</div>
+                        </div>
+                    </div>
+
+                    <div class="selected-files" id="selectedFiles"></div>
+
+                    <div class="form-actions">
+                        <button type="button" class="clear-btn" id="clearForm">
+                            <i class="fas fa-eraser"></i>
+                            Clear
+                        </button>
+                        <button type="submit" class="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2025 MailSender Pro. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Sending email...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
+
 </html>

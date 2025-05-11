@@ -1,12 +1,82 @@
 <!DOCTYPE html>
-<html>
-<head><title>Register</title></head>
+<html lang="en" data-theme="{{ theme }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - MailSender Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
 <body>
-  <h2>Register</h2>
-  <form method="POST">
-    Email: <input type="email" name="email" required />
-    <button type="submit">Register</button>
-  </form>
-  <p><a href="{{ url_for('login') }}">Login</a></p>
+    <div class="auth-container">
+        <div class="auth-box register-animation">
+            <div class="auth-header">
+                <div class="logo">
+                    <i class="fas fa-paper-plane"></i>
+                    <h1>MailSender Pro</h1>
+                </div>
+                <div class="theme-toggle">
+                    <button id="theme-btn" aria-label="Toggle theme">
+                        <i class="fas fa-sun light-icon"></i>
+                        <i class="fas fa-moon dark-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-content">
+                <div class="register-illustration">
+                    <svg class="register-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect class="paper" x="40" y="20" width="120" height="60" rx="2" />
+                        <line class="line" x1="60" y1="40" x2="140" y2="40" />
+                        <line class="line" x1="60" y1="50" x2="140" y2="50" />
+                        <line class="line" x1="60" y1="60" x2="120" y2="60" />
+                        <circle class="stamp" cx="150" cy="30" r="10" />
+                        <path class="pen" d="M160,80 L170,70 L175,75 L165,85 Z" />
+                    </svg>
+                </div>
+
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Start sending emails with MailSender Pro</p>
+
+                <div class="flash-messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <div class="alert alert-{{ category }}">
+                            <i class="{% if category == 'success' %}fas fa-check-circle{% elif category == 'error' %}fas fa-exclamation-circle{% else %}fas fa-info-circle{% endif %}"></i>
+                            {{ message }}
+                            <button class="close-alert">×</button>
+                          </div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
+                </div>
+
+                <form method="POST" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i>
+                            Email Address
+                        </label>
+                        <input type="email" id="email" name="email" required autofocus>
+                    </div>
+
+                    <button type="submit" class="auth-btn">
+                        <i class="fas fa-user-plus"></i>
+                        Register
+                    </button>
+                </form>
+
+                <div class="auth-links">
+                    <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
+
 </html>

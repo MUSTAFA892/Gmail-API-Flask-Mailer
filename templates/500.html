@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ theme }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Server Error</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <div class="error-animation">
+                <i class="fas fa-envelope"></i>
+                <i class="fas fa-exclamation-triangle error-icon"></i>
+            </div>
+            <h1>500</h1>
+            <h2>Server Error</h2>
+            <p>Oops! Something went wrong on our end. We're working to fix the issue.</p>
+            <a href="{{ url_for('home') }}" class="btn-return">
+                <i class="fas fa-home"></i> Return to Homepage
+            </a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>

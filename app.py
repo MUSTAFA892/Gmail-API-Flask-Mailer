@@ -3,7 +3,7 @@ import json
 import base64
 import logging
 import re
-from flask import Flask, request, render_template, redirect, url_for, session, flash
+from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify
 from datetime import timedelta
 from dotenv import load_dotenv
 from email.mime.multipart import MIMEMultipart
@@ -136,6 +136,51 @@ def send():
         flash("Failed to send email.")
 
     return redirect(url_for('home'))
+
+@app.route('/backend_service', methods=['POST'])
+def backend_service():
+    if not request.is_json:
+        logging.error("Request must contain JSON data")
+        return jsonify({'error': 'Request must contain JSON data'}), 400
+
+    if 'user_email' not in session:
+        logging.error("User not authenticated")
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    data = request.get_json()
+    if not isinstance(data, list):
+        logging.error("Expected a list of email items")
+        return jsonify({'error': 'Expected a list of email items'}), 400
+
+    service = get_gmail_service()
+    if not service:
+        logging.error("Gmail service not authorized")
+        return jsonify({'error': 'Gmail service not authorized'}), 401
+
+    for item in data:
+        to = item.get('recipient', '').strip()
+        subject = item.get('subject', '').strip()
+        body = item.get('body', '').strip()
+        sender = item.get('sender_email', session['user_email']).strip()
+        reply_to = item.get('reply_to', '').strip()
+
+        if not is_valid_email(to):
+            logging.error(f"Invalid recipient email: {to}")
+            return jsonify({'error': f'Invalid recipient email: {to}'}), 400
+
+        if not is_valid_email(sender):
+            logging.error(f"Invalid sender email: {sender}")
+            return jsonify({'error': f'Invalid sender email: {sender}'}), 400
+
+        try:
+            email_msg = create_email(sender, to, reply_to, subject, body, files=[])
+            service.users().messages().send(userId='me', body=email_msg).execute()
+            logging.info(f"Email sent to {to} with subject '{subject}'")
+        except Exception as e:
+            logging.error(f"Failed to send email to {to}: {str(e)}")
+            return jsonify({'error': f'Failed to send email to {to}: {str(e)}'}), 500
+
+    return jsonify({'message': 'Emails sent successfully'}), 200
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

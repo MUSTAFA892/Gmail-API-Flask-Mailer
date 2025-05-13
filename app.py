@@ -143,10 +143,22 @@ def backend_service():
         logging.error("Request must contain JSON data")
         return jsonify({'error': 'Request must contain JSON data'}), 400
 
-    if 'user_email' not in session:
-        logging.error("User not authenticated")
-        return jsonify({'error': 'User not authenticated'}), 401
+    # Validate Authorization header
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        logging.error("Missing or invalid Authorization header")
+        return jsonify({'error': 'Missing or invalid Authorization header'}), 401
+    access_token = auth_header.split(' ')[1]
 
+    # Find user in MongoDB with matching access_token
+    user = tokens_col.find_one({"credentials.token": access_token})
+    if not user:
+        logging.error("No user found with provided access token")
+        return jsonify({'error': 'Invalid access token'}), 401
+    
+    # Set session['user_email'] for get_gmail_service
+    session['user_email'] = user['email']
+    
     data = request.get_json()
     if not isinstance(data, list):
         logging.error("Expected a list of email items")
@@ -161,7 +173,7 @@ def backend_service():
         to = item.get('recipient', '').strip()
         subject = item.get('subject', '').strip()
         body = item.get('body', '').strip()
-        sender = item.get('sender_email', session['user_email']).strip()
+        sender = item.get('sender_email', user['email']).strip()
         reply_to = item.get('reply_to', '').strip()
 
         if not is_valid_email(to):
@@ -181,7 +193,7 @@ def backend_service():
             return jsonify({'error': f'Failed to send email to {to}: {str(e)}'}), 500
 
     return jsonify({'message': 'Emails sent successfully'}), 200
-
+    
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':

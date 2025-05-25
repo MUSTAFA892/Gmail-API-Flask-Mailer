@@ -171,14 +171,6 @@ For production deployment:
 
 ---
 
-## 👨‍💻 Author
-
-**Mustafa**
-
-GitHub: [github.com/your-username](https://github.com/your-username)
-
----
-
 ## 📄 License
 
 MIT License. Use responsibly.
